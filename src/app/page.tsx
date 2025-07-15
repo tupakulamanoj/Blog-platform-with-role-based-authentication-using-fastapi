@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,12 +9,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import Spinner from "@/components/Spinner";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -65,6 +68,46 @@ export default function Home() {
         setLoading(false);
     }
   }, [accessToken]);
+  
+  const handleDelete = async (postId: string) => {
+    if (!accessToken) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to delete a post.",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/delete?blog_id=${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to delete post.');
+      }
+      
+      setPosts(posts.filter(p => p.id !== postId));
+      
+      toast({
+        title: "Post Deleted",
+        description: "The post has been successfully deleted.",
+      });
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: error.message || "An unknown error occurred.",
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -92,7 +135,12 @@ export default function Home() {
       ) : posts.length > 0 ? (
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post: Post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard 
+              key={post.id} 
+              post={post}
+              user={user}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       ) : (
