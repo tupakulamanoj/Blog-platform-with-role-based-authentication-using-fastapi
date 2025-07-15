@@ -39,7 +39,10 @@ export default function SignUpPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          username: values.email,
+          password: values.password
+        }),
       });
 
       if (!response.ok) {
