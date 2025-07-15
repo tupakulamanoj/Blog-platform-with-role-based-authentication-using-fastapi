@@ -1,30 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { getPosts } from "@/lib/actions";
-import { deletePost } from "@/app/posts/actions";
 import { Post } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth-provider";
 import { useToast } from "@/hooks/use-toast";
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Spinner from "@/components/Spinner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Calendar, Edit, Trash2, User } from "lucide-react";
+import { Calendar, User } from "lucide-react";
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
@@ -60,18 +46,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
   }, [params.id, router, toast, accessToken, authLoading]);
 
-  const handleDelete = async () => {
-    if (!post || !accessToken) return;
-    try {
-      await deletePost(post.id, accessToken);
-      toast({ title: "Post deleted successfully" });
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      toast({ variant: "destructive", title: "Failed to delete post." });
-    }
-  };
-
   if (loading || authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -87,8 +61,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
       </div>
     );
   }
-  
-  const isAuthor = !!accessToken;
 
   return (
     <article className="container mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -108,34 +80,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
             </time>
           </div>
         </div>
-        {isAuthor && (
-          <div className="flex gap-2 pt-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/posts/${post.id}/edit`}>
-                <Edit className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </Button>
-             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your post.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        )}
       </div>
 
       <div className="prose prose-lg dark:prose-invert max-w-none break-words">
