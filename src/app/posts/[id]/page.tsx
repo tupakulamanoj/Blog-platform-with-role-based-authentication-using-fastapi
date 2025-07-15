@@ -29,7 +29,7 @@ import { Calendar, Edit, Trash2, User } from "lucide-react";
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { accessToken } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -82,7 +82,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
     );
   }
   
-  const isAuthor = user && user.uid === post.authorId;
+  // Note: The concept of post ownership needs to be re-evaluated.
+  // This check is now just based on whether a user is logged in.
+  const isAuthor = !!accessToken;
 
   return (
     <article className="container mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">

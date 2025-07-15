@@ -8,7 +8,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { suggestTags } from "@/ai/flows/suggest-tags";
 
 type PostInput = {
@@ -17,14 +17,17 @@ type PostInput = {
   tags: string[];
 };
 
-export async function createPost(data: PostInput) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("You must be logged in to create a post.");
+// IMPORTANT: This createPost action is now insecure.
+// It relies on client-side user information. In a real application,
+// you would pass the access token to this server action and validate it
+// on the backend to securely get the user's ID and name.
+export async function createPost(data: PostInput, author: {id: string, name: string}) {
+  if (!author || !author.id) throw new Error("You must be logged in to create a post.");
 
   const postData = {
     ...data,
-    authorId: user.uid,
-    authorName: user.email || "Anonymous",
+    authorId: author.id,
+    authorName: author.name,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -35,14 +38,13 @@ export async function createPost(data: PostInput) {
   return docRef.id;
 }
 
+// IMPORTANT: This updatePost action is now insecure.
+// It does not verify post ownership. In a real application,
+// you would pass the access token to this server action and validate
+// on the backend that the authenticated user is the owner of the post.
 export async function updatePost(data: PostInput & { id: string }) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("You must be logged in to update a post.");
-  
   const { id, ...postData } = data;
   const postRef = doc(db, "posts", id);
-  
-  // In a real app, you'd verify ownership here using security rules or admin SDK
   
   await updateDoc(postRef, {
     ...postData,

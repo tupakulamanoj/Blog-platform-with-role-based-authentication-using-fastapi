@@ -6,33 +6,60 @@ import {
   createContext,
   useContext,
   type ReactNode,
+  useCallback,
 } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import Spinner from "@/components/Spinner";
 
 interface AuthContextType {
-  user: User | null;
+  accessToken: string | null;
   loading: boolean;
+  login: (token: string) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
+  accessToken: null,
   loading: true,
+  login: () => {},
+  logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
+      }
+    } catch (error) {
+      console.error("Could not read from localStorage", error);
+    } finally {
       setLoading(false);
-    });
-
-    return () => unsubscribe();
+    }
   }, []);
+
+  const login = useCallback((token: string) => {
+    setAccessToken(token);
+    try {
+      localStorage.setItem("accessToken", token);
+    } catch (error) {
+       console.error("Could not write to localStorage", error);
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    setAccessToken(null);
+    try {
+      localStorage.removeItem("accessToken");
+    } catch (error) {
+      console.error("Could not remove from localStorage", error);
+    }
+  }, []);
+  
+  const value = { accessToken, loading, login, logout };
 
   if (loading) {
     return (
@@ -43,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

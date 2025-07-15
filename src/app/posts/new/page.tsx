@@ -7,16 +7,16 @@ import BlogPostForm from "@/components/BlogPostForm";
 import Spinner from "@/components/Spinner";
 
 export default function NewPostPage() {
-  const { user, loading } = useAuth();
+  const { accessToken, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !accessToken) {
       router.push("/login");
     }
-  }, [user, loading, router]);
+  }, [accessToken, loading, router]);
 
-  if (loading || !user) {
+  if (loading || !accessToken) {
     return (
       <div className="flex h-full items-center justify-center">
         <Spinner />

@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
 import { useAuth } from "@/hooks/use-auth-provider";
-import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import { PlusCircle, LogOut } from "lucide-react";
 
 export default function Header() {
-  const { user } = useAuth();
+  const { accessToken, logout } = useAuth();
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    await signOut(auth);
+  const handleSignOut = () => {
+    logout();
     router.push("/");
+    router.refresh();
   };
 
   return (
@@ -24,7 +23,7 @@ export default function Header() {
         <Logo />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
-            {user ? (
+            {accessToken ? (
               <>
                 <Button
                   variant="ghost"

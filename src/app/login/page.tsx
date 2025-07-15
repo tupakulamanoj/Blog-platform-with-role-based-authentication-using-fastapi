@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useAuth } from "@/hooks/use-auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,12 +63,13 @@ export default function LoginPage() {
         throw new Error("API did not return an access token.");
       }
       
-      // Since we are not using Firebase auth directly on the client,
-      // we'll just redirect on successful login.
-      // In a real app, you would store the access_token.
+      login(data.access_token);
       
       router.push("/");
-    } catch (error: any) {
+      router.refresh();
+
+    } catch (error: any)
+    {
       console.error(error);
       toast({
         variant: "destructive",

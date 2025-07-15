@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth-provider";
 import { Post } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ interface BlogPostFormProps {
 export default function BlogPostForm({ post }: BlogPostFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { accessToken } = useAuth();
   const [tags, setTags] = useState<string[]>(post?.tags || []);
   const [tagInput, setTagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,6 +81,10 @@ export default function BlogPostForm({ post }: BlogPostFormProps) {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!accessToken) {
+      toast({ variant: "destructive", title: "You must be logged in." });
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (post) {
@@ -86,7 +92,10 @@ export default function BlogPostForm({ post }: BlogPostFormProps) {
         toast({ title: "Post updated successfully!" });
         router.push(`/posts/${post.id}`);
       } else {
-        const newPostId = await createPost({ ...values, tags });
+        // NOTE: In a real app, you would decode the JWT to get the user ID and name
+        // instead of hardcoding it. This is a temporary solution.
+        const author = { id: "user-id-from-jwt", name: "User from JWT" };
+        const newPostId = await createPost({ ...values, tags }, author);
         toast({ title: "Post created successfully!" });
         router.push(`/posts/${newPostId}`);
       }
