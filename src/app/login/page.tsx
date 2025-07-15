@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { signInWithCustomToken } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +39,6 @@ export default function LoginPage() {
       formData.append('username', values.email);
       formData.append('password', values.password);
       formData.append('scope', '');
-      // TODO: Replace with your actual client_id and client_secret
       formData.append('client_id', '');
       formData.append('client_secret', '');
 
@@ -58,13 +55,15 @@ export default function LoginPage() {
         throw new Error(errorData.detail || 'Login failed.');
       }
 
-      const { custom_token } = await response.json();
+      const data = await response.json();
 
-      if (!custom_token) {
-        throw new Error("API did not return a custom token.");
+      if (!data.access_token) {
+        throw new Error("API did not return an access token.");
       }
-
-      await signInWithCustomToken(auth, custom_token);
+      
+      // Since we are not using Firebase auth directly on the client,
+      // we'll just redirect on successful login.
+      // In a real app, you would store the access_token.
       
       router.push("/");
     } catch (error: any) {
