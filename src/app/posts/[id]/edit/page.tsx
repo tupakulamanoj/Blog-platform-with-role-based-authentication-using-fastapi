@@ -24,8 +24,7 @@ const formSchema = z.object({
   body: z.string().min(1, "Content is required."),
 });
 
-export default function EditPostPage({ params }: { params: { id: string } }) {
-  const postId = params.id;
+export default function EditPostPage({ params: { id: postId } }: { params: { id: string } }) {
   const router = useRouter();
   const { toast } = useToast();
   const { accessToken, user, loading: authLoading } = useAuth();

@@ -14,8 +14,7 @@ import { Calendar, User as UserIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 
-export default function PostPage({ params }: { params: { id: string } }) {
-  const postId = params.id;
+export default function PostPage({ params: { id: postId } }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
