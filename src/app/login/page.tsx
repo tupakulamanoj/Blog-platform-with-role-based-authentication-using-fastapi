@@ -41,6 +41,7 @@ export default function LoginPage() {
       formData.append('username', values.email);
       formData.append('password', values.password);
       formData.append('scope', '');
+      // TODO: Replace with your actual client_id and client_secret
       formData.append('client_id', '');
       formData.append('client_secret', '');
 
@@ -58,10 +59,16 @@ export default function LoginPage() {
       }
 
       const { custom_token } = await response.json();
+
+      if (!custom_token) {
+        throw new Error("API did not return a custom token.");
+      }
+
       await signInWithCustomToken(auth, custom_token);
       
       router.push("/");
     } catch (error: any) {
+      console.error(error);
       toast({
         variant: "destructive",
         title: "Login Failed",
