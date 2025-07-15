@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 
 export default function PostPage({ params }: { params: { id: string } }) {
+  const { id: postId } = params;
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         const posts = responseData.data;
         
         if (Array.isArray(posts)) {
-            const fetchedPost = posts.find((p: any) => p.blog_id?.toString() === params.id);
+            const fetchedPost = posts.find((p: any) => p.blog_id?.toString() === postId);
             if (fetchedPost) {
               setPost({
                   id: fetchedPost.blog_id?.toString(),
@@ -75,7 +76,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
         router.push("/login");
     }
 
-  }, [params.id, router, toast, accessToken, authLoading]);
+  }, [postId, router, toast, accessToken, authLoading]);
 
   if (loading || authLoading) {
     return (

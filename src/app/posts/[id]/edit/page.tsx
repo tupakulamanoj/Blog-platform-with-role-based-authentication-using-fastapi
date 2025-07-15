@@ -25,6 +25,7 @@ const formSchema = z.object({
 });
 
 export default function EditPostPage({ params }: { params: { id: string } }) {
+  const { id: postId } = params;
   const router = useRouter();
   const { toast } = useToast();
   const { accessToken, user, loading: authLoading } = useAuth();
@@ -59,7 +60,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         const posts = responseData.data;
         
         if (Array.isArray(posts)) {
-            const fetchedPost = posts.find((p: any) => p.blog_id?.toString() === params.id);
+            const fetchedPost = posts.find((p: any) => p.blog_id?.toString() === postId);
             if (fetchedPost) {
                 const loadedPost = {
                     id: fetchedPost.blog_id?.toString(),
@@ -96,7 +97,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         toast({ variant: "destructive", title: "Authentication required" });
         router.push("/login");
     }
-  }, [params.id, router, toast, accessToken, authLoading, form, user]);
+  }, [postId, router, toast, accessToken, authLoading, form, user]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!accessToken) {
@@ -107,7 +108,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     setIsLoading(true);
     try {
         const queryParams = new URLSearchParams({
-            blog_id: params.id,
+            blog_id: postId,
             title: values.title,
             body: values.body,
         }).toString();
