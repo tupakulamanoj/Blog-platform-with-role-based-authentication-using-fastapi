@@ -43,8 +43,6 @@ export default function Home() {
                 title: post.title,
                 content: post.body,
                 authorId: post.user_id?.toString(),
-                // Fields not present in the API response are given default values.
-                authorName: "Unknown Author",
                 tags: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),

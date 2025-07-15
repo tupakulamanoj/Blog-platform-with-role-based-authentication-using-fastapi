@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Post } from "@/lib/types";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpRight } from "lucide-react";
 
 interface PostCardProps {
   post: Post;
@@ -18,7 +17,6 @@ export default function PostCard({ post }: PostCardProps) {
           <CardTitle className="font-headline text-xl leading-tight">
             {post.title}
           </CardTitle>
-          <p className="text-sm text-muted-foreground pt-1">By {post.authorName}</p>
         </CardHeader>
         <CardContent className="flex-grow">
           <p className="text-sm">{contentSnippet}</p>

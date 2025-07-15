@@ -4,7 +4,6 @@ export interface Post {
   content: string;
   tags: string[];
   authorId: string;
-  authorName: string;
   createdAt: string;
   updatedAt: string;
 }

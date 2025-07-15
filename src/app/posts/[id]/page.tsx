@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { Badge } from "@/components/ui/badge";
 import Spinner from "@/components/Spinner";
-import { Calendar, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 
@@ -47,8 +47,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
                   title: fetchedPost.title,
                   content: fetchedPost.body,
                   authorId: fetchedPost.user_id?.toString(),
-                  // Fields not present in the API response are given default values.
-                  authorName: "Unknown Author",
                   tags: [],
                   createdAt: new Date().toISOString(),
                   updatedAt: new Date().toISOString(),
@@ -113,10 +111,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
           {post.title}
         </h1>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span>{post.authorName}</span>
-          </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
              <time dateTime={new Date(post.createdAt).toISOString()}>
