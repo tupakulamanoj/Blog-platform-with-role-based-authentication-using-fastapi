@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { Badge } from "@/components/ui/badge";
 import Spinner from "@/components/Spinner";
-import { Calendar } from "lucide-react";
+import { Calendar, User as UserIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 
@@ -17,7 +18,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { accessToken, loading: authLoading } = useAuth();
+  const { accessToken, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -104,6 +105,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const authorEmail = post.authorId === user?.email ? user.email : 'an unknown author';
+
   return (
     <article className="container mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 space-y-4">
@@ -111,6 +114,10 @@ export default function PostPage({ params }: { params: { id: string } }) {
           {post.title}
         </h1>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+           <div className="flex items-center gap-2">
+            <UserIcon className="h-4 w-4" />
+            <span>{ user?.email ?? "Unknown Author"}</span>
+          </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
              <time dateTime={new Date(post.createdAt).toISOString()}>

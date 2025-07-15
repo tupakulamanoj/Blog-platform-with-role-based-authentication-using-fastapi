@@ -4,7 +4,7 @@ import { Post, User } from "@/lib/types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 
 interface PostCardProps {
   post: Post;
@@ -20,6 +20,10 @@ export default function PostCard({ post, user, onDelete }: PostCardProps) {
     e.preventDefault();
     e.stopPropagation();
     onDelete(post.id);
+  }
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   }
 
   return (
@@ -45,15 +49,29 @@ export default function PostCard({ post, user, onDelete }: PostCardProps) {
             ))}
           </div>
           {isAdmin && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-muted-foreground hover:text-destructive"
-                onClick={handleDeleteClick}
-                aria-label="Delete post"
-              >
-                  <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center">
+                  <Button 
+                    asChild
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-muted-foreground hover:text-primary"
+                    onClick={handleEditClick}
+                    aria-label="Edit post"
+                  >
+                    <Link href={`/posts/${post.id}/edit`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={handleDeleteClick}
+                    aria-label="Delete post"
+                  >
+                      <Trash2 className="h-4 w-4" />
+                  </Button>
+              </div>
           )}
         </CardFooter>
     </Card>
