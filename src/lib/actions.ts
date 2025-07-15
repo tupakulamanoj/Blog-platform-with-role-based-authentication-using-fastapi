@@ -5,20 +5,6 @@
 
 "use server";
 
-import {
-  collection,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
-import { revalidatePath } from "next/cache";
-import { db } from "./firebase";
 import { Post } from "./types";
 
 // Data Fetching
@@ -59,25 +45,10 @@ export async function getPost(id: string, accessToken: string): Promise<Post | n
     throw new Error("You must be logged in to view a post.");
   }
   try {
-    const response = await fetch(`http://localhost:5000/read/${id}`, {
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-      }
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const post = await response.json();
-    return {
-      ...post,
-      createdAt: post.created_at,
-      updatedAt: post.updated_at,
-    } as Post;
+    // Fetch all posts and find the one with the matching ID
+    const posts = await getPosts(accessToken);
+    const post = posts.find((p) => p.id === id);
+    return post || null;
   } catch (error) {
     console.error("Error fetching post: ", error);
     throw error;

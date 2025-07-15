@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { suggestTags } from "@/ai/flows/suggest-tags";
-import { Post } from "@/lib/types";
 
 type PostInput = {
   title: string;
