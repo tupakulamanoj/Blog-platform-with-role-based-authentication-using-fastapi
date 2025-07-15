@@ -5,6 +5,6 @@ export interface Post {
   tags: string[];
   authorId: string;
   authorName: string;
-  createdAt: string; // Changed from Timestamp to string for API compatibility
-  updatedAt: string; // Changed from Timestamp to string for API compatibility
+  createdAt: string;
+  updatedAt: string;
 }

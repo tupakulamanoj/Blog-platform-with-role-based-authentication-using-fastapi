@@ -36,21 +36,28 @@ export default function PostPage({ params }: { params: { id: string } }) {
             throw new Error("Failed to fetch posts. Please check your connection or try logging in again.");
         }
         
-        const posts = await response.json();
+        const responseData = await response.json();
+        const posts = responseData.data;
         
         if (Array.isArray(posts)) {
-            const fetchedPost = posts.find((p: any) => p.id === params.id);
+            const fetchedPost = posts.find((p: any) => p.blog_id?.toString() === params.id);
             if (fetchedPost) {
               setPost({
-                  ...fetchedPost,
-                  createdAt: fetchedPost.created_at,
-                  updatedAt: fetchedPost.updated_at,
+                  id: fetchedPost.blog_id?.toString(),
+                  title: fetchedPost.title,
+                  content: fetchedPost.body,
+                  authorId: fetchedPost.user_id?.toString(),
+                  // Fields not present in the API response are given default values.
+                  authorName: "Unknown Author",
+                  tags: [],
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
               });
             } else {
               setError("Post not found.");
             }
         } else {
-            console.error("API did not return an array of posts:", posts);
+            console.error("API did not return an array of posts in the 'data' field:", posts);
             setError("Post data is not in the expected format.");
         }
 

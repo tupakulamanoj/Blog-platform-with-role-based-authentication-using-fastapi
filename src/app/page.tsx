@@ -34,17 +34,24 @@ export default function Home() {
         if (!response.ok) {
             throw new Error("Failed to fetch posts. Please check your connection or try logging in again.");
         }
-        const fetchedPosts = await response.json();
+        const responseData = await response.json();
+        const fetchedPosts = responseData.data;
         
         if (Array.isArray(fetchedPosts)) {
             const formattedPosts = fetchedPosts.map((post: any) => ({
-                ...post,
-                createdAt: post.created_at,
-                updatedAt: post.updated_at,
+                id: post.blog_id?.toString(),
+                title: post.title,
+                content: post.body,
+                authorId: post.user_id?.toString(),
+                // Fields not present in the API response are given default values.
+                authorName: "Unknown Author",
+                tags: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
             }));
             setPosts(formattedPosts);
         } else {
-            console.error("API did not return an array of posts:", fetchedPosts);
+            console.error("API did not return an array of posts in the 'data' field:", fetchedPosts);
             setPosts([]);
         }
       } catch (e: any) {
