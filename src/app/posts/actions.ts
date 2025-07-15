@@ -24,7 +24,7 @@ export async function createPost(data: PostInput) {
   const postData = {
     ...data,
     authorId: user.uid,
-    authorName: user.displayName || "Anonymous",
+    authorName: user.email || "Anonymous",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
