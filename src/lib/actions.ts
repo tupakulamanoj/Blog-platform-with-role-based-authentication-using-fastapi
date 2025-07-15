@@ -49,7 +49,8 @@ export async function getPost(id: string, accessToken: string): Promise<Post | n
     const posts = await getPosts(accessToken);
     const post = posts.find((p) => p.id === id);
     return post || null;
-  } catch (error) {
+  } catch (error)
+  {
     console.error("Error fetching post: ", error);
     throw error;
   }
