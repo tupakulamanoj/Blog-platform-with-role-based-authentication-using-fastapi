@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getPosts } from "@/lib/actions";
 import { Post } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth-provider";
 import PostCard from "@/components/PostCard";
@@ -43,7 +42,7 @@ export default function Home() {
         }));
         setPosts(formattedPosts);
       } catch (e: any) {
-        setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
+        setError("Failed to connect to the backend. Please ensure the server is running and that it is configured to accept requests from this application (CORS).");
         console.error(e);
       } finally {
         setLoading(false);

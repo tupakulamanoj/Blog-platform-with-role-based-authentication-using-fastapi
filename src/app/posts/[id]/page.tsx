@@ -49,7 +49,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
           setError("Post not found.");
         }
       } catch (e: any) {
-        setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
+        setError("Failed to connect to the backend. Please ensure the server is running and that it is configured to accept requests from this application (CORS).");
         console.error(e);
       } finally {
         setLoading(false);
