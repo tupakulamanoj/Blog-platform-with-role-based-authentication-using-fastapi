@@ -1,15 +1,8 @@
 "use server";
 
-import {
-  addDoc,
-  collection,
-  doc,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/firebase";
 import { suggestTags } from "@/ai/flows/suggest-tags";
+import { Post } from "@/lib/types";
 
 type PostInput = {
   title: string;
@@ -17,40 +10,52 @@ type PostInput = {
   tags: string[];
 };
 
-// IMPORTANT: This createPost action is now insecure.
-// It relies on client-side user information. In a real application,
-// you would pass the access token to this server action and validate it
-// on the backend to securely get the user's ID and name.
-export async function createPost(data: PostInput, author: {id: string, name: string}) {
-  if (!author || !author.id) throw new Error("You must be logged in to create a post.");
+export async function createPost(post: PostInput, accessToken: string) {
+  if (!accessToken) throw new Error("You must be logged in to create a post.");
 
-  const postData = {
-    ...data,
-    authorId: author.id,
-    authorName: author.name,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
-
-  const docRef = await addDoc(collection(db, "posts"), postData);
-  revalidatePath("/");
-  revalidatePath(`/posts/${docRef.id}`);
-  return docRef.id;
-}
-
-// IMPORTANT: This updatePost action is now insecure.
-// It does not verify post ownership. In a real application,
-// you would pass the access token to this server action and validate
-// on the backend that the authenticated user is the owner of the post.
-export async function updatePost(data: PostInput & { id: string }) {
-  const { id, ...postData } = data;
-  const postRef = doc(db, "posts", id);
-  
-  await updateDoc(postRef, {
-    ...postData,
-    updatedAt: serverTimestamp(),
+  const response = await fetch("http://localhost:5000/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(post),
   });
 
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Failed to create post.");
+  }
+
+  const newPost = await response.json();
+  revalidatePath("/");
+  if (newPost.id) {
+    revalidatePath(`/posts/${newPost.id}`);
+  }
+  return newPost.id;
+}
+
+export async function updatePost(
+  post: PostInput & { id: string },
+  accessToken: string
+) {
+  if (!accessToken) throw new Error("You must be logged in to update a post.");
+
+  const { id, ...postData } = post;
+  const response = await fetch(`http://localhost:5000/update/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(postData),
+  });
+
+  if (!response.ok) {
+     const errorData = await response.json();
+    throw new Error(errorData.detail || "Failed to update post.");
+  }
+  
   revalidatePath("/");
   revalidatePath(`/posts/${id}`);
 }

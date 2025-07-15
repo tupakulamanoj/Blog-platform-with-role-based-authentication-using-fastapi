@@ -88,20 +88,17 @@ export default function BlogPostForm({ post }: BlogPostFormProps) {
     setIsSubmitting(true);
     try {
       if (post) {
-        await updatePost({ ...values, id: post.id, tags });
+        await updatePost({ ...values, id: post.id, tags }, accessToken);
         toast({ title: "Post updated successfully!" });
         router.push(`/posts/${post.id}`);
       } else {
-        // NOTE: In a real app, you would decode the JWT to get the user ID and name
-        // instead of hardcoding it. This is a temporary solution.
-        const author = { id: "user-id-from-jwt", name: "User from JWT" };
-        const newPostId = await createPost({ ...values, tags }, author);
+        const newPostId = await createPost({ ...values, tags }, accessToken);
         toast({ title: "Post created successfully!" });
         router.push(`/posts/${newPostId}`);
       }
       router.refresh();
-    } catch (error) {
-      toast({ variant: "destructive", title: "An error occurred." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "An error occurred.", description: error.message });
       setIsSubmitting(false);
     }
   };
