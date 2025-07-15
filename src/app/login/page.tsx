@@ -37,8 +37,12 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const formData = new URLSearchParams();
+      formData.append('grant_type', 'password');
       formData.append('username', values.email);
       formData.append('password', values.password);
+      formData.append('scope', '');
+      formData.append('client_id', '');
+      formData.append('client_secret', '');
 
       const response = await fetch('http://localhost:5000/login', {
         method: 'POST',
@@ -50,11 +54,11 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed.');
+        throw new Error(errorData.detail || 'Login failed.');
       }
 
-      const { token } = await response.json();
-      await signInWithCustomToken(auth, token);
+      const { custom_token } = await response.json();
+      await signInWithCustomToken(auth, custom_token);
       
       router.push("/");
     } catch (error: any) {
