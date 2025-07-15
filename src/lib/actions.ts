@@ -39,19 +39,3 @@ export async function getPosts(accessToken: string): Promise<Post[]> {
     throw error;
   }
 }
-
-export async function getPost(id: string, accessToken: string): Promise<Post | null> {
-  if (!accessToken) {
-    throw new Error("You must be logged in to view a post.");
-  }
-  try {
-    // Fetch all posts and find the one with the matching ID
-    const posts = await getPosts(accessToken);
-    const post = posts.find((p) => p.id === id);
-    return post || null;
-  } catch (error)
-  {
-    console.error("Error fetching post: ", error);
-    throw error;
-  }
-}

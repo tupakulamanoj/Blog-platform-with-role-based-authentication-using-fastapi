@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getPost } from "@/lib/actions";
+import { getPosts } from "@/lib/actions";
 import { Post } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth-provider";
 
@@ -20,8 +20,8 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchPost = async (token: string) => {
       try {
-        const fetchedPost = await getPost(params.id, token);
-
+        const posts = await getPosts(token);
+        const fetchedPost = posts.find(p => p.id === params.id);
         if (fetchedPost) {
           setPost(fetchedPost);
         } else {
