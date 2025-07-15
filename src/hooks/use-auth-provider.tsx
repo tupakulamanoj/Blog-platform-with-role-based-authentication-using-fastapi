@@ -9,9 +9,27 @@ import {
   useCallback,
 } from "react";
 import Spinner from "@/components/Spinner";
+import { User } from "@/lib/types";
+
+// Helper to decode JWT
+function decodeJwt(token: string): any {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return null;
+  }
+}
 
 interface AuthContextType {
   accessToken: string | null;
+  user: User | null;
   loading: boolean;
   login: (token: string) => void;
   logout: () => void;
@@ -19,6 +37,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   accessToken: null,
+  user: null,
   loading: true,
   login: () => {},
   logout: () => {},
@@ -26,6 +45,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const token = localStorage.getItem("accessToken");
       if (token) {
         setAccessToken(token);
+        const decodedToken = decodeJwt(token);
+        if (decodedToken && decodedToken.sub) {
+            setUser({ email: decodedToken.sub });
+        }
       }
     } catch (error) {
       console.error("Could not read from localStorage", error);
@@ -43,6 +67,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback((token: string) => {
     setAccessToken(token);
+    const decodedToken = decodeJwt(token);
+    if (decodedToken && decodedToken.sub) {
+        setUser({ email: decodedToken.sub });
+    }
     try {
       localStorage.setItem("accessToken", token);
     } catch (error) {
@@ -52,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     setAccessToken(null);
+    setUser(null);
     try {
       localStorage.removeItem("accessToken");
     } catch (error) {
@@ -59,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
   
-  const value = { accessToken, loading, login, logout };
+  const value = { accessToken, user, loading, login, logout };
 
   if (loading) {
     return (
