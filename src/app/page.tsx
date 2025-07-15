@@ -35,10 +35,9 @@ export default function Home() {
             throw new Error("Failed to fetch posts. Please check your connection or try logging in again.");
         }
         const responseData = await response.json();
-        const fetchedPosts = responseData.data;
         
-        if (Array.isArray(fetchedPosts)) {
-            const formattedPosts = fetchedPosts.map((post: any) => ({
+        if (responseData && Array.isArray(responseData.data)) {
+            const formattedPosts = responseData.data.map((post: any) => ({
                 id: post.blog_id?.toString(),
                 title: post.title,
                 content: post.body,
@@ -49,7 +48,7 @@ export default function Home() {
             }));
             setPosts(formattedPosts);
         } else {
-            console.error("API did not return an array of posts in the 'data' field:", fetchedPosts);
+            console.error("API did not return an array of posts in the 'data' field:", responseData);
             setPosts([]);
         }
       } catch (e: any) {
@@ -102,7 +101,7 @@ export default function Home() {
             <div className="text-center">
               <h2 className="text-2xl font-headline font-semibold">No Posts Yet</h2>
               <p className="mt-2 text-muted-foreground">
-                {accessToken ? "No posts found or unable to connect." : "Log in to see your posts."}
+                {accessToken ? "No blogs found." : "Log in to see your posts."}
               </p>
             </div>
           </CardContent>
