@@ -35,12 +35,18 @@ export default function Home() {
             throw new Error("Failed to fetch posts. Please check your connection or try logging in again.");
         }
         const fetchedPosts = await response.json();
-        const formattedPosts = fetchedPosts.map((post: any) => ({
-            ...post,
-            createdAt: post.created_at,
-            updatedAt: post.updated_at,
-        }));
-        setPosts(formattedPosts);
+        
+        if (Array.isArray(fetchedPosts)) {
+            const formattedPosts = fetchedPosts.map((post: any) => ({
+                ...post,
+                createdAt: post.created_at,
+                updatedAt: post.updated_at,
+            }));
+            setPosts(formattedPosts);
+        } else {
+            console.error("API did not return an array of posts:", fetchedPosts);
+            setPosts([]);
+        }
       } catch (e: any) {
         setError("Failed to connect to the backend. Please ensure the server is running and that it is configured to accept requests from this application (CORS).");
         console.error(e);
@@ -49,7 +55,11 @@ export default function Home() {
       }
     };
 
-    fetchPosts();
+    if (accessToken) {
+        fetchPosts();
+    } else {
+        setLoading(false);
+    }
   }, [accessToken]);
 
   return (

@@ -37,17 +37,23 @@ export default function PostPage({ params }: { params: { id: string } }) {
         }
         
         const posts = await response.json();
-        const fetchedPost = posts.find((p: any) => p.id === params.id);
         
-        if (fetchedPost) {
-          setPost({
-              ...fetchedPost,
-              createdAt: fetchedPost.created_at,
-              updatedAt: fetchedPost.updated_at,
-          });
+        if (Array.isArray(posts)) {
+            const fetchedPost = posts.find((p: any) => p.id === params.id);
+            if (fetchedPost) {
+              setPost({
+                  ...fetchedPost,
+                  createdAt: fetchedPost.created_at,
+                  updatedAt: fetchedPost.updated_at,
+              });
+            } else {
+              setError("Post not found.");
+            }
         } else {
-          setError("Post not found.");
+            console.error("API did not return an array of posts:", posts);
+            setError("Post data is not in the expected format.");
         }
+
       } catch (e: any) {
         setError("Failed to connect to the backend. Please ensure the server is running and that it is configured to accept requests from this application (CORS).");
         console.error(e);
