@@ -54,28 +54,32 @@ export async function getPosts(accessToken: string): Promise<Post[]> {
   }
 }
 
-export async function getPost(id: string): Promise<Post | null> {
+export async function getPost(id: string, accessToken: string): Promise<Post | null> {
+  if (!accessToken) {
+    throw new Error("You must be logged in to view a post.");
+  }
   try {
-    const docRef = doc(db, "posts", id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      // The API doesn't expose a single post endpoint yet, so we keep using Firestore for now.
-      // This will need to be updated to use the new API when available.
-      const postData = docSnap.data();
-      return { 
-        id: docSnap.id,
-        title: postData.title,
-        content: postData.content,
-        tags: postData.tags,
-        authorId: postData.authorId,
-        authorName: postData.authorName,
-        createdAt: (postData.createdAt as Timestamp).toDate().toISOString(),
-        updatedAt: (postData.updatedAt as Timestamp).toDate().toISOString(),
-      } as Post;
+    const response = await fetch(`http://localhost:5000/read/${id}`, {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return null;
+    
+    const post = await response.json();
+    return {
+      ...post,
+      createdAt: post.created_at,
+      updatedAt: post.updated_at,
+    } as Post;
   } catch (error) {
     console.error("Error fetching post: ", error);
-    return null;
+    throw error;
   }
 }

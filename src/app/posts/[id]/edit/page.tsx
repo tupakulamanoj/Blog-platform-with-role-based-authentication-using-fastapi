@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getPost } from "@/lib/actions";
 import { Post } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth-provider";
 
@@ -19,23 +18,18 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPost = async (token: string) => {
       try {
-        const docRef = doc(db, "posts", params.id);
-        const docSnap = await getDoc(docRef);
+        const fetchedPost = await getPost(params.id, token);
 
-        if (docSnap.exists()) {
-          const postData = { id: docSnap.id, ...docSnap.data() } as Post;
-          // Note: The concept of post ownership needs to be re-evaluated
-          // with the new authentication system. For now, any logged-in user can edit.
-          // A real implementation would involve validating the accessToken against
-          // the post's authorId on the backend.
-          setPost(postData);
+        if (fetchedPost) {
+          setPost(fetchedPost);
         } else {
           router.push("/404");
         }
       } catch (error) {
-        toast({ variant: "destructive", title: "Error fetching post." });
+        toast({ variant: "destructive", title: "Error fetching post.", description: "You may not have permission to edit this post or it may not exist." });
+         router.push("/");
       } finally {
         setLoading(false);
       }
@@ -45,7 +39,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         if(!accessToken) {
             router.push('/login');
         } else {
-            fetchPost();
+            fetchPost(accessToken);
         }
     }
   }, [params.id, router, accessToken, authLoading, toast]);

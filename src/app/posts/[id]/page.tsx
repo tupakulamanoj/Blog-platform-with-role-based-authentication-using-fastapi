@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { format } from "date-fns";
-import { db } from "@/lib/firebase";
+import { getPost } from "@/lib/actions";
+import { deletePost } from "@/app/posts/actions";
 import { Post } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth-provider";
 import { useToast } from "@/hooks/use-toast";
@@ -29,35 +29,40 @@ import { Calendar, Edit, Trash2, User } from "lucide-react";
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const { accessToken } = useAuth();
+  const { accessToken, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPost = async (token: string) => {
       try {
-        const docRef = doc(db, "posts", params.id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setPost({ id: docSnap.id, ...docSnap.data() } as Post);
+        const fetchedPost = await getPost(params.id, token);
+        if (fetchedPost) {
+          setPost(fetchedPost);
         } else {
           router.push("/404");
         }
       } catch (error) {
         toast({ variant: "destructive", title: "Error fetching post." });
+        router.push("/");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPost();
-  }, [params.id, router, toast]);
+    if (!authLoading && accessToken) {
+        fetchPost(accessToken);
+    } else if (!authLoading && !accessToken) {
+        toast({ variant: "destructive", title: "Authentication required", description: "You need to be logged in to view this page."});
+        router.push("/login");
+    }
+
+  }, [params.id, router, toast, accessToken, authLoading]);
 
   const handleDelete = async () => {
-    if (!post) return;
+    if (!post || !accessToken) return;
     try {
-      await deleteDoc(doc(db, "posts", post.id));
+      await deletePost(post.id, accessToken);
       toast({ title: "Post deleted successfully" });
       router.push("/");
       router.refresh();
@@ -66,7 +71,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner />
@@ -82,8 +87,6 @@ export default function PostPage({ params }: { params: { id: string } }) {
     );
   }
   
-  // Note: The concept of post ownership needs to be re-evaluated.
-  // This check is now just based on whether a user is logged in.
   const isAuthor = !!accessToken;
 
   return (
@@ -99,8 +102,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            <time dateTime={post.createdAt.toDate().toISOString()}>
-              {format(post.createdAt.toDate(), "MMMM d, yyyy")}
+             <time dateTime={new Date(post.createdAt).toISOString()}>
+                {format(new Date(post.createdAt), "MMMM d, yyyy")}
             </time>
           </div>
         </div>

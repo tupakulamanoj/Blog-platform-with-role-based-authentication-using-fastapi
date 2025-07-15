@@ -60,6 +60,25 @@ export async function updatePost(
   revalidatePath(`/posts/${id}`);
 }
 
+export async function deletePost(id: string, accessToken: string) {
+  if (!accessToken) throw new Error("You must be logged in to delete a post.");
+
+  const response = await fetch(`http://localhost:5000/delete/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || "Failed to delete post.");
+  }
+
+  revalidatePath("/");
+}
+
+
 export async function suggestPostTags(input: { blogPostContent: string }) {
   return await suggestTags(input);
 }
