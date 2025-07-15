@@ -31,9 +31,15 @@ export async function getPosts(): Promise<Post[]> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const posts = await response.json();
-    return posts as Post[];
+    return posts.map((post: any) => ({
+      ...post,
+      createdAt: post.created_at,
+      updatedAt: post.updated_at,
+    })) as Post[];
   } catch (error) {
     console.error("Error fetching posts: ", error);
+    // Return an empty array to prevent the app from crashing.
+    // This could be due to the backend server not being available.
     return [];
   }
 }
