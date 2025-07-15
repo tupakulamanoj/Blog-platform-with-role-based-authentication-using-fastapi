@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth-provider";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
-import { LogOut } from "lucide-react";
+import { LogOut, PlusCircle } from "lucide-react";
 
 export default function Header() {
   const { accessToken, logout } = useAuth();
@@ -25,6 +25,12 @@ export default function Header() {
           <nav className="flex items-center space-x-2">
             {accessToken ? (
               <>
+                <Button variant="outline" asChild>
+                  <Link href="/posts/new">
+                    <PlusCircle className="mr-2" />
+                    New Post
+                  </Link>
+                </Button>
                 <Button variant="ghost" onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
