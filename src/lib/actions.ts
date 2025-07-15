@@ -1,21 +1,17 @@
-// This file would ideally be on the server, but due to limitations
-// with server-side Firebase auth without a library, some parts are designed
-// to be called from client-side handlers or need user context passed in.
-// For a production app, use Firebase Admin SDK on a dedicated backend or secure cloud functions.
-
 "use server";
 
 import { Post } from "./types";
 
-// Data Fetching
+// This function is kept for components that might still use it,
+// but new implementations should fetch data directly on the client.
 export async function getPosts(accessToken: string): Promise<Post[]> {
   if (!accessToken) {
     return [];
   }
 
   try {
-    const response = await fetch("http://localhost:5000/read", {
-      cache: "no-store", // Ensure we get fresh data on every request
+    const response = await fetch("http://127.0.0.1:5000/read", {
+      cache: "no-store",
       headers: {
         "Authorization": `Bearer ${accessToken}`,
       }
@@ -35,7 +31,6 @@ export async function getPosts(accessToken: string): Promise<Post[]> {
     })) as Post[];
   } catch (error) {
     console.error("Error fetching posts: ", error);
-    // Re-throw the error to be caught by the calling component
     throw error;
   }
 }

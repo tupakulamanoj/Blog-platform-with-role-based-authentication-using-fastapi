@@ -18,19 +18,34 @@ export default function Home() {
 
   useEffect(() => {
     const fetchPosts = async () => {
+      if (!accessToken) {
+        setLoading(false);
+        setPosts([]);
+        return;
+      }
+
       setLoading(true);
       setError(null);
-      if (accessToken) {
-        try {
-          const fetchedPosts = await getPosts(accessToken);
-          setPosts(fetchedPosts);
-        } catch (e: any) {
-          setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
-        } finally {
-          setLoading(false);
+      try {
+        const response = await fetch("http://127.0.0.1:5000/read", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch posts. Please check your connection or try logging in again.");
         }
-      } else {
-        setPosts([]);
+        const fetchedPosts = await response.json();
+        const formattedPosts = fetchedPosts.map((post: any) => ({
+            ...post,
+            createdAt: post.created_at,
+            updatedAt: post.updated_at,
+        }));
+        setPosts(formattedPosts);
+      } catch (e: any) {
+        setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
+        console.error(e);
+      } finally {
         setLoading(false);
       }
     };

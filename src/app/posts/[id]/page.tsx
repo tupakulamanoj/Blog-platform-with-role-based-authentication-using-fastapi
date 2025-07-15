@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { getPosts } from "@/lib/actions";
 import { Post } from "@/lib/types";
 import { useAuth } from "@/hooks/use-auth-provider";
 import { useToast } from "@/hooks/use-toast";
@@ -24,17 +23,34 @@ export default function PostPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const fetchPost = async (token: string) => {
+      setLoading(true);
       setError(null);
       try {
-        const posts = await getPosts(token);
-        const fetchedPost = posts.find(p => p.id === params.id);
+        const response = await fetch("http://127.0.0.1:5000/read", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch posts. Please check your connection or try logging in again.");
+        }
+        
+        const posts = await response.json();
+        const fetchedPost = posts.find((p: any) => p.id === params.id);
+        
         if (fetchedPost) {
-          setPost(fetchedPost);
+          setPost({
+              ...fetchedPost,
+              createdAt: fetchedPost.created_at,
+              updatedAt: fetchedPost.updated_at,
+          });
         } else {
           setError("Post not found.");
         }
       } catch (e: any) {
         setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
+        console.error(e);
       } finally {
         setLoading(false);
       }
