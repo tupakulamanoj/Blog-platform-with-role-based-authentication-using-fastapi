@@ -27,20 +27,22 @@ export default function PostCard({ post, user, onDelete }: PostCardProps) {
   }
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 group">
-        <CardHeader>
-          <Link href={`/posts/${post.id}`} className="group-hover:text-primary">
-            <CardTitle className="font-headline text-xl leading-tight">
-              {post.title}
-            </CardTitle>
-          </Link>
-        </CardHeader>
-        <CardContent className="flex-grow">
-           <Link href={`/posts/${post.id}`} className="block">
-            <p className="text-sm">{contentSnippet}</p>
-          </Link>
-        </CardContent>
-        <CardFooter className="flex justify-between items-center">
+    <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:!scale-105" style={{ perspective: '1000px' }}>
+        <div className="transition-transform duration-300 group-hover:rotate-x-4 group-hover:-translate-z-2">
+            <CardHeader>
+              <Link href={`/posts/${post.id}`} className="group-hover:text-primary">
+                <CardTitle className="font-headline text-xl leading-tight">
+                  {post.title}
+                </CardTitle>
+              </Link>
+            </CardHeader>
+            <CardContent className="flex-grow">
+               <Link href={`/posts/${post.id}`} className="block">
+                <p className="text-sm">{contentSnippet}</p>
+              </Link>
+            </CardContent>
+        </div>
+        <CardFooter className="mt-auto flex justify-between items-center pt-4">
           <div className="flex-wrap gap-2">
             {post.tags.slice(0, 3).map((tag) => (
               <Badge key={tag} variant="secondary">

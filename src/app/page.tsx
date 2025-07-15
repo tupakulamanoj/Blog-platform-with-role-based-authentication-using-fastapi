@@ -111,15 +111,17 @@ export default function Home() {
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-8 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-center text-4xl font-bold text-transparent font-headline sm:text-5xl">
-        Welcome to NextBlog
-      </h1>
-      <p className="mb-12 text-center text-lg text-muted-foreground">
-        Explore ideas, stories, and insights from our community.
-      </p>
+      <div className="animate-fade-in-up">
+        <h1 className="mb-8 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-center text-4xl font-bold text-transparent font-headline sm:text-5xl">
+          Welcome to NextBlog
+        </h1>
+        <p className="mb-12 text-center text-lg text-muted-foreground">
+          Explore ideas, stories, and insights from our community.
+        </p>
+      </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-8">
+        <Alert variant="destructive" className="mb-8 animate-fade-in">
           <Terminal className="h-4 w-4" />
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
@@ -133,7 +135,7 @@ export default function Home() {
             <Spinner />
         </div>
       ) : posts.length > 0 ? (
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
           {posts.map((post: Post) => (
             <PostCard 
               key={post.id} 
@@ -144,7 +146,7 @@ export default function Home() {
           ))}
         </div>
       ) : (
-        <Card className="flex items-center justify-center py-20">
+        <Card className="flex items-center justify-center py-20 animate-fade-in">
           <CardContent>
             <div className="text-center">
               <h2 className="text-2xl font-headline font-semibold">No Posts Yet</h2>
