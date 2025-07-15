@@ -36,15 +36,16 @@ export default function LoginPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
+      const formData = new URLSearchParams();
+      formData.append('username', values.email);
+      formData.append('password', values.password);
+
       const response = await fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          username: values.email,
-          password: values.password
-        }),
+        body: formData,
       });
 
       if (!response.ok) {
