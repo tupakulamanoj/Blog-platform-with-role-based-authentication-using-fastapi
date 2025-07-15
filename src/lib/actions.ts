@@ -7,7 +7,6 @@
 
 import {
   collection,
-  getDocs,
   getDoc,
   addDoc,
   updateDoc,
@@ -25,12 +24,14 @@ import { Post } from "./types";
 // Data Fetching
 export async function getPosts(): Promise<Post[]> {
   try {
-    const postsCollection = collection(db, "posts");
-    const q = query(postsCollection, orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() } as Post)
-    );
+    const response = await fetch("http://localhost:5000/read", {
+      cache: "no-store", // Ensure we get fresh data on every request
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const posts = await response.json();
+    return posts as Post[];
   } catch (error) {
     console.error("Error fetching posts: ", error);
     return [];
@@ -42,7 +43,19 @@ export async function getPost(id: string): Promise<Post | null> {
     const docRef = doc(db, "posts", id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as Post;
+      // The API doesn't expose a single post endpoint yet, so we keep using Firestore for now.
+      // This will need to be updated to use the new API when available.
+      const postData = docSnap.data();
+      return { 
+        id: docSnap.id,
+        title: postData.title,
+        content: postData.content,
+        tags: postData.tags,
+        authorId: postData.authorId,
+        authorName: postData.authorName,
+        createdAt: (postData.createdAt as Timestamp).toDate().toISOString(),
+        updatedAt: (postData.updatedAt as Timestamp).toDate().toISOString(),
+      } as Post;
     }
     return null;
   } catch (error) {

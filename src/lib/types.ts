@@ -1,5 +1,3 @@
-import type { Timestamp } from "firebase/firestore";
-
 export interface Post {
   id: string;
   title: string;
@@ -7,6 +5,6 @@ export interface Post {
   tags: string[];
   authorId: string;
   authorName: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string; // Changed from Timestamp to string for API compatibility
+  updatedAt: string; // Changed from Timestamp to string for API compatibility
 }
