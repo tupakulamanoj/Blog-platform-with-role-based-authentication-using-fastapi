@@ -1,19 +1,44 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { getPosts } from "@/lib/actions";
 import { Post } from "@/lib/types";
+import { useAuth } from "@/hooks/use-auth-provider";
 import PostCard from "@/components/PostCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+import Spinner from "@/components/Spinner";
 
-export default async function Home() {
-  let posts: Post[] = [];
-  let error = null;
+export default function Home() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { accessToken } = useAuth();
 
-  try {
-    posts = await getPosts();
-  } catch (e) {
-    error = e;
-  }
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+      if (accessToken) {
+        try {
+          const fetchedPosts = await getPosts(accessToken);
+          setPosts(fetchedPosts);
+        } catch (e: any) {
+          setError(e.message || "Could not fetch posts.");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // If there's no access token, we don't need to fetch posts.
+        // Or you might want to show public posts here in the future.
+        setPosts([]);
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [accessToken]);
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -25,16 +50,20 @@ export default async function Home() {
       </p>
 
       {error && (
-         <Alert variant="destructive" className="mb-8">
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>Connection Error</AlertTitle>
-            <AlertDescription>
-              Could not connect to the backend service. Please make sure it is running and accessible.
-            </AlertDescription>
+        <Alert variant="destructive" className="mb-8">
+          <Terminal className="h-4 w-4" />
+          <AlertTitle>Connection Error</AlertTitle>
+          <AlertDescription>
+            {error}
+          </AlertDescription>
         </Alert>
       )}
 
-      {posts.length > 0 ? (
+      {loading ? (
+        <div className="flex justify-center">
+            <Spinner />
+        </div>
+      ) : posts.length > 0 ? (
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post: Post) => (
             <PostCard key={post.id} post={post} />
@@ -46,7 +75,7 @@ export default async function Home() {
             <div className="text-center">
               <h2 className="text-2xl font-headline font-semibold">No Posts Yet</h2>
               <p className="mt-2 text-muted-foreground">
-                Be the first to share your story!
+                {accessToken ? "Create a new post to get started!" : "Log in to see your posts."}
               </p>
             </div>
           </CardContent>

@@ -22,12 +22,23 @@ import { db } from "./firebase";
 import { Post } from "./types";
 
 // Data Fetching
-export async function getPosts(): Promise<Post[]> {
+export async function getPosts(accessToken: string): Promise<Post[]> {
+  if (!accessToken) {
+    return [];
+  }
+
   try {
     const response = await fetch("http://localhost:5000/read", {
       cache: "no-store", // Ensure we get fresh data on every request
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+      }
     });
+
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error("Unauthorized. Please log in again.");
+        }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const posts = await response.json();
@@ -38,9 +49,8 @@ export async function getPosts(): Promise<Post[]> {
     })) as Post[];
   } catch (error) {
     console.error("Error fetching posts: ", error);
-    // Return an empty array to prevent the app from crashing.
-    // This could be due to the backend server not being available.
-    return [];
+    // Re-throw the error to be caught by the calling component
+    throw error;
   }
 }
 
