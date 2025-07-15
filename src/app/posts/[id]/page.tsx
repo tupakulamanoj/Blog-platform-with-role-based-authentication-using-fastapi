@@ -11,27 +11,30 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import Spinner from "@/components/Spinner";
 import { Calendar, User } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 export default function PostPage({ params }: { params: { id: string } }) {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { accessToken, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchPost = async (token: string) => {
+      setError(null);
       try {
         const posts = await getPosts(token);
         const fetchedPost = posts.find(p => p.id === params.id);
         if (fetchedPost) {
           setPost(fetchedPost);
         } else {
-          router.push("/404");
+          setError("Post not found.");
         }
-      } catch (error) {
-        toast({ variant: "destructive", title: "Error fetching post." });
-        router.push("/");
+      } catch (e: any) {
+        setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
       } finally {
         setLoading(false);
       }
@@ -50,6 +53,18 @@ export default function PostPage({ params }: { params: { id: string } }) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+     return (
+      <div className="container mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <Alert variant="destructive">
+          <Terminal className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </div>
     );
   }

@@ -25,13 +25,11 @@ export default function Home() {
           const fetchedPosts = await getPosts(accessToken);
           setPosts(fetchedPosts);
         } catch (e: any) {
-          setError(e.message || "Could not fetch posts.");
+          setError("Failed to connect to the backend. Please ensure the server is running and accessible.");
         } finally {
           setLoading(false);
         }
       } else {
-        // If there's no access token, we don't need to fetch posts.
-        // Or you might want to show public posts here in the future.
         setPosts([]);
         setLoading(false);
       }
@@ -75,7 +73,7 @@ export default function Home() {
             <div className="text-center">
               <h2 className="text-2xl font-headline font-semibold">No Posts Yet</h2>
               <p className="mt-2 text-muted-foreground">
-                {accessToken ? "Create a new post to get started!" : "Log in to see your posts."}
+                {accessToken ? "No posts found or unable to connect." : "Log in to see your posts."}
               </p>
             </div>
           </CardContent>
